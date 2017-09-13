@@ -1,8 +1,11 @@
 import tkinter as tk
 
 class Etiquette(tk.Label):
-    def __init__(self, minesweeper, i, j, number, texte, foreground="blue"):
-        super().__init__(minesweeper.cadre2, text = texte, fg = foreground)
+    colors = ["blue", "blue", "forest green", "orange red", "navy", "brown", "light sea green", "black", "gray", "black"]
+    texts = [" ", "1", "2", "3", "4", "5", "6", "7", "8", "x"]
+    
+    def __init__(self, minesweeper, i, j, number):
+        super().__init__(minesweeper.cadre2, text = Etiquette.texts[number], fg = Etiquette.colors[number])
         self.minesweeper = minesweeper
         self.row = i
         self.column = j

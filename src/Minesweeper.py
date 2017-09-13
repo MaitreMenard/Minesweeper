@@ -1,9 +1,12 @@
 import tkinter as tk
 import random
-from Field import Field
+from field import Field
 from Case import Case
 from Etiquette import Etiquette
 from Chrono import Chrono
+from view.menu import Menu
+from view.options_window import OptionsWindow
+from view.statistics_window import StatisticsWindow
 
 class Minesweeper():
     def __init__(self, width, height, mines):
@@ -16,17 +19,9 @@ class Minesweeper():
         self.root = tk.Tk()
         self.root.title('Minesweeper')
         
-        self.cadreMenu = tk.Frame(self.root)
-        self.cadreMenu.grid(row=0, column=0)
-        self.mb = tk.Menubutton(self.cadreMenu,anchor=tk.W,text="Game")
-        self.mb.grid(row=0, column=0)
-        self.mb.menu = tk.Menu(self.mb,tearoff=0)
-        self.mb["menu"] = self.mb.menu
-        self.mb.menu.add_command(command=self.new_game,label="New Game")
-        self.mb.menu.add_command(command=self.statistics,label="Statistics")
-        self.mb.menu.add_command(command=self.options,label="Options")
-        self.mb.menu.add_command(command=self.exit,label="Exit")
-        
+        self.menu = Menu(self.root, self.new_game, self.on_statistics_window_opened,
+                          self.on_options_window_opened, self.exit)
+
         self.smiley = tk.PhotoImage(file="smiley.gif").subsample(2, 2)
         
         self.cadre1 = tk.Frame(self.root, height = 48, width = 250)
@@ -79,26 +74,10 @@ class Minesweeper():
         for i in range(self.height):
             liste_ligne = []
             for j in range(self.width):
-                if self.field[i,j] == 0:
-                    lab = Etiquette(self, i, j, 0, " ")
-                elif self.field[i,j] == 1:
-                    lab = Etiquette(self, i, j, 1, "1")
-                elif self.field[i,j] == 2:
-                    lab = Etiquette(self, i, j, 2, "2", "forest green")
-                elif self.field[i,j] == 3:
-                    lab = Etiquette(self, i, j, 3, "3", "orange red")
-                elif self.field[i,j] == 4:
-                    lab = Etiquette(self, i, j, 4, "4", "navy")
-                elif self.field[i,j] == 5:
-                    lab = Etiquette(self, i, j, 5, "5", "brown")
-                elif self.field[i,j] == 6:
-                    lab = Etiquette(self, i, j, 6, "6", "light sea green")
-                elif self.field[i,j] == 7:
-                    lab = Etiquette(self, i, j, 7, "7", "black")
-                elif self.field[i,j] == 8:
-                    lab = Etiquette(self, i, j, 8, "8", "gray")
+                if self.field[i,j] == "x":
+                    lab = Etiquette(self, i, j, -1)
                 else:
-                    lab = Etiquette(self, i, j, -1, "x", "black")
+                    lab = Etiquette(self, i, j, self.field[i,j])
                     
                 lab.grid(row=i,column=j,padx=labelWidth,pady=labelHeight)
                 
@@ -155,43 +134,11 @@ class Minesweeper():
         fich.write(str(self.nbrWins))
         fich.close()
         
-    def statistics(self):
-        fen_statistics = tk.Tk()
-        fen_statistics.title("statistics")
-        tableFrame = tk.Frame(fen_statistics, height = 30, width = 30)
-        tableFrame.grid(row=1, pady=1)
-        tableFrame['relief']=tk.SUNKEN
-        tableFrame["borderwidth"]=5
+    def on_statistics_window_opened(self):
+        StatisticsWindow(self.nbrGames, self.nbrWins, self.highScore)
         
-        tk.Label(tableFrame, text="Difficulty").grid(row=1,column=1,padx=5,pady=2)
-        tk.Label(tableFrame, text="Easy").grid(row=1,column=2,padx=5,pady=2)
-        tk.Label(tableFrame, text="Medium").grid(row=1,column=3,padx=5,pady=2)
-        tk.Label(tableFrame, text="Hard").grid(row=1,column=4,padx=5,pady=2)
-        tk.Label(tableFrame, text="Game Started").grid(row=2,column=1,padx=5,pady=2)
-        tk.Label(tableFrame, text=str(self.nbrGames)).grid(row=2,column=2,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=2,column=3,padx=5,pady=5)
-        tk.Label(tableFrame, text="N/A").grid(row=2,column=4,padx=5,pady=2)
-        tk.Label(tableFrame, text="Game Won").grid(row=3,column=1,padx=5,pady=2)
-        tk.Label(tableFrame, text=str(self.nbrWins)).grid(row=3,column=2,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=3,column=3,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=3,column=4,padx=5,pady=2)
-        tk.Label(tableFrame, text="% Game Won").grid(row=4,column=1,padx=5,pady=2)
-        tk.Label(tableFrame, text=str(int(100*self.nbrWins/self.nbrGames))+"%").grid(row=4,column=2,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=4,column=3,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=4,column=4,padx=5,pady=2)
-        tk.Label(tableFrame, text="Best Time").grid(row=5, column=1,padx=5,pady=2)
-        tk.Label(tableFrame, text=str(self.highScore)).grid(row=5,column=2,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=5,column=3,padx=5,pady=2)
-        tk.Label(tableFrame, text="N/A").grid(row=5,column=4,padx=5,pady=2)
-
-        close = tk.Button(fen_statistics, command=fen_statistics.destroy, text="close")
-        close.grid(row=2, padx=100, pady=25)
-    
-    def options(self):
-        fen_options = tk.Tk()
-        fen_options.title("options")
-        close = tk.Button(fen_options, command=fen_options.destroy, text="close")
-        close.grid(padx=100, pady=50)
+    def on_options_window_opened(self):
+        OptionsWindow()
     
     def exit(self):
         self.root.quit()

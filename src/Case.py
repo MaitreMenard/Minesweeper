@@ -45,11 +45,13 @@ class Case(tk.Button):
     def rightClick(self, event):
         if self["text"] == "    ":
             self["text"] = "  ! "
+            self["foreground"] = "red"
             self.flagged = True
             if self.minesweeper.minesLeft > 0:
                 self.minesweeper.minesLeft -= 1
         elif self["text"] == "  ! ":
             self["text"] = " ? "
+            self["foreground"] = "black"
             self.flagged = False
             self.minesweeper.minesLeft += 1
         elif self["text"] == " ? ":
