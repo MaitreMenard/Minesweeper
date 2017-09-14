@@ -1,3 +1,3 @@
-import Minesweeper
+from Minesweeper import Minesweeper
 
-minesweeper = Minesweeper.Minesweeper(9,9,10)
+minesweeper = Minesweeper(9, 9, 10)

@@ -1,62 +1,62 @@
 import random
 
+
 class Field:
-    def __init__(self, heigh, width, mines):
-        self.field = []
-        for i in  range(heigh):
-            ligne = []
-            for j in range(width):
-                ligne.append(0)
-            self.field.append(ligne)
+    def __init__(self, height, width, mines):
+        self.height = height
+        self.width = width
+        self.mines = mines
+        self.grid = None
+
+        self._init_grid()
+        self._add_mines_to_grid()
+
+    def _init_grid(self):
+        self.grid = []
+        for i in range(self.height):
+            row = [0] * self.width
+            self.grid.append(row)
+
+    def _add_mines_to_grid(self):
+        mines = self.mines
         while mines > 0:
-            mineX = random.randrange(width)
-            mineY = random.randrange(heigh)
-            if self.field[mineY][mineX] != "x":
-                self.field[mineY][mineX] = "x"
+            mine_x = random.randrange(self.width)
+            mine_y = random.randrange(self.height)
+            if self.grid[mine_y][mine_x] != "x":
+                self.grid[mine_y][mine_x] = "x"
+                self._update_hints(mine_x, mine_y)
             else:
                 continue
             mines -= 1
-        for i in range(heigh):
-            for j in range(width):
-                if self.field[i][j] != "x":
-                    if i-1 >= 0 and j-1 >= 0 and self.field[i-1][j-1] == "x":
-                        self.field[i][j] += 1
-                    if i-1 >= 0 and self.field[i-1][j] == "x":
-                        self.field[i][j] += 1
-                    if i-1 >= 0 and j+1 < width and self.field[i-1][j+1] == "x":
-                        self.field[i][j] += 1
-                    if j-1 >= 0 and self.field[i][j-1] == "x":
-                        self.field[i][j] += 1
-                    if j+1 < width and self.field[i][j+1] == "x":
-                        self.field[i][j] += 1
-                    if i+1 < heigh and j-1 >= 0 and self.field[i+1][j-1] == "x":
-                        self.field[i][j] += 1
-                    if i+1 < heigh and self.field[i+1][j] == "x":
-                        self.field[i][j] += 1
-                    if i+1 < heigh and j+1 < width and self.field[i+1][j+1] == "x":
-                        self.field[i][j] += 1
-    
-    def getValue(self, i, j):
-        return self.field[i][j]
-    
-    def setValue(self, i, j, value):
-        self.field[i][j] = value
+
+    def _update_hints(self, mine_x, mine_y):
+        min_x = mine_x - 1 if mine_x > 0 else 0
+        max_x = mine_x + 1 if mine_x < self.width - 1 else self.width - 1
+        min_y = mine_y - 1 if mine_y > 0 else 0
+        max_y = mine_y + 1 if mine_y < self.height - 1 else self.height - 1
+
+        for i in range(min_y, max_y + 1):
+            for j in range(min_x, max_x + 1):
+                if (i != mine_y or j != mine_x) and self.grid[i][j] != "x":
+                    self.grid[i][j] += 1
+
+    def has_mine_at_position(self, i, j):
+        return self.grid[i][j] == "x"
         
     def __getitem__(self, index):
-        i,j = index
-        return self.field[i][j]
+        i, j = index
+        return self.grid[i][j]
     
     def __setitem__(self, index, value):
-        i,j = index
-        self.field[i][j] = value
+        i, j = index
+        self.grid[i][j] = value
         
     def __str__(self):
-        """
-        Methode qui convertit le field en une chaine de caracteres.
-        """
         string = ""
-        for i in range(len(self.field)):
-            string = string + str(self.field[i]) + "\n"
+        for i in range(self.height):
+            for j in range(self.width - 1):
+                string += str(self.grid[i][j]) + " "
+            string += str(self.grid[i][-1]) + "\n"
         return string
 
 

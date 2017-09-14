@@ -1,6 +1,7 @@
 import tkinter as tk
 from view.window import Window
 
+
 class OptionsWindow(Window):
     def __init__(self):
         super().__init__("options")
