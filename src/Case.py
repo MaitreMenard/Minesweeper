@@ -1,67 +1,45 @@
 import tkinter as tk
+from enum import Enum
+
+
+class ButtonState(Enum):
+    NORMAL = "    "
+    FLAGGED = "  ! "
+    QUESTION_MARK = " ? "
 
 
 class Case(tk.Button):
-    def __init__(self, minesweeper, i, j, text):
-        super().__init__(minesweeper.cadre2, command=self.presserBoutton, text=text)
-        self.minesweeper = minesweeper
+    def __init__(self, parent, i, j, left_click_callback, right_click_callback):
+        super().__init__(parent, command=self.on_left_click, text="    ")
+        self.grid(row=i, column=j)
+        self["relief"] = tk.RAISED
+        self["borderwidth"] = 3
+        self.grid_propagate(0)
+        # bt.config(height = 30)
+
         self.i = i
         self.j = j
+        self.left_click_callback = left_click_callback
+        self.right_click_callback = right_click_callback
         self.clicked = False
-        self.flagged = False
-        self.bind("<Button-3>", self.rightClick)        
+        self.state = ButtonState.NORMAL
+        self.bind("<Button-3>", self.on_right_click)
     
-    def presserBoutton(self):
-        if not self.minesweeper.started:
-            self.minesweeper.started = True
-            print("game start : " + str(self.minesweeper.started))
+    def on_left_click(self):
         self.clicked = True
-        if self.minesweeper.field.has_mine_at_position(self.i, self.j):
-            self.destroy()
-            print("BOOM !!!!")
-            self.minesweeper.vivant = False
-        elif self.minesweeper.field[self.i, self.j] == 0:
-            if self.i-1 >= 0 and self.j-1 >= 0 and not self.minesweeper.is_clicked(self.i-1, self.j-1):
-                self.minesweeper.liste_bouttons[self.i-1][self.j-1].presserBoutton()
-
-            if self.i-1 >= 0 and not self.minesweeper.is_clicked(self.i-1, self.j):
-                self.minesweeper.liste_bouttons[self.i-1][self.j].presserBoutton()
-
-            if self.i-1 >= 0 and self.j+1 < self.minesweeper.width and not self.minesweeper.is_clicked(self.i-1, self.j+1):
-                self.minesweeper.liste_bouttons[self.i-1][self.j+1].presserBoutton()
-
-            if self.j-1 >= 0 and not self.minesweeper.is_clicked(self.i, self.j-1):
-                self.minesweeper.liste_bouttons[self.i][self.j-1].presserBoutton()
-
-            if self.j+1 < self.minesweeper.width and not self.minesweeper.is_clicked(self.i, self.j+1):
-                self.minesweeper.liste_bouttons[self.i][self.j+1].presserBoutton()
-
-            if self.i+1 < self.minesweeper.height and self.j-1 >= 0 and not self.minesweeper.is_clicked(self.i+1, self.j-1):
-                self.minesweeper.liste_bouttons[self.i+1][self.j-1].presserBoutton()
-
-            if self.i+1 < self.minesweeper.height and not self.minesweeper.is_clicked(self.i+1, self.j):
-                self.minesweeper.liste_bouttons[self.i+1][self.j].presserBoutton()
-
-            if self.i+1 < self.minesweeper.height and self.j+1 < self.minesweeper.width and not self.minesweeper.is_clicked(self.i+1, self.j+1):
-                self.minesweeper.liste_bouttons[self.i+1][self.j+1].presserBoutton()
         self.destroy()
-        self.minesweeper.nbrBouttons -= 1
-        #print(self.minesweeper.nbrBouttons)
-        if self.minesweeper.nbrBouttons == self.minesweeper.nbrMines:
-            self.minesweeper.win = True
+        self.left_click_callback(self.i, self.j)
         
-    def rightClick(self, event):
-        if self["text"] == "    ":
+    def on_right_click(self, _):
+        if self.state == ButtonState.NORMAL:
             self["text"] = "  ! "
             self["foreground"] = "red"
-            self.flagged = True
-            if self.minesweeper.minesLeft > 0:
-                self.minesweeper.minesLeft -= 1
-        elif self["text"] == "  ! ":
+            self.state = ButtonState.FLAGGED
+        elif self.state == ButtonState.FLAGGED:
             self["text"] = " ? "
             self["foreground"] = "black"
-            self.flagged = False
-            self.minesweeper.minesLeft += 1
-        elif self["text"] == " ? ":
+            self.state = ButtonState.QUESTION_MARK
+        elif self.state == ButtonState.QUESTION_MARK:
             self["text"] = "    "
-        self.minesweeper.updateLabel_MinesLeft()
+            self.state = ButtonState.NORMAL
+        self.right_click_callback(self.state)
