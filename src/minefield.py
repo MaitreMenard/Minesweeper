@@ -1,7 +1,9 @@
 import random
 
+from tile import Tile
 
-class Field:
+
+class Minefield:
     def __init__(self, height, width, mines):
         self.height = height
         self.width = width
@@ -14,7 +16,9 @@ class Field:
     def _init_grid(self):
         self.grid = []
         for i in range(self.height):
-            row = [0] * self.width
+            row = []
+            for j in range(self.width):
+                row.append(Tile())
             self.grid.append(row)
 
     def _add_mines_to_grid(self):
@@ -22,35 +26,32 @@ class Field:
         while mines > 0:
             mine_x = random.randrange(self.width)
             mine_y = random.randrange(self.height)
-            if self.grid[mine_y][mine_x] != "x":
-                self.grid[mine_y][mine_x] = "x"
+            if not self.grid[mine_y][mine_x].is_mine:
+                self.grid[mine_y][mine_x].is_mine = True
                 self._update_hints(mine_x, mine_y)
             else:
                 continue
             mines -= 1
 
     def _update_hints(self, mine_x, mine_y):
-        min_x = mine_x - 1 if mine_x > 0 else 0
-        max_x = mine_x + 1 if mine_x < self.width - 1 else self.width - 1
-        min_y = mine_y - 1 if mine_y > 0 else 0
-        max_y = mine_y + 1 if mine_y < self.height - 1 else self.height - 1
+        min_x = max(0, mine_x - 1)
+        max_x = min(self.width - 1, mine_x + 1)
+        min_y = max(0, mine_y - 1)
+        max_y = min(self.height - 1, mine_y + 1)
 
         for i in range(min_y, max_y + 1):
             for j in range(min_x, max_x + 1):
-                if (i != mine_y or j != mine_x) and self.grid[i][j] != "x":
-                    self.grid[i][j] += 1
+                if i != mine_y or j != mine_x:
+                    if not self.grid[i][j].is_mine:
+                        self.grid[i][j].adjacent_mines += 1
 
     def has_mine_at_position(self, i, j):
-        return self.grid[i][j] == "x"
+        return self.grid[i][j].is_mine
         
     def __getitem__(self, index):
         i, j = index
         return self.grid[i][j]
     
-    def __setitem__(self, index, value):
-        i, j = index
-        self.grid[i][j] = value
-        
     def __str__(self):
         string = ""
         for i in range(self.height):
@@ -64,5 +65,5 @@ if __name__ == "__main__":
     WIDTH = 9
     HEIGHT = 9
     nbrMines = 10 
-    field = Field(HEIGHT, WIDTH, nbrMines)
+    field = Minefield(HEIGHT, WIDTH, nbrMines)
     print(field)

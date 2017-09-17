@@ -39,20 +39,32 @@ class Statistics:
     
     def save(self):
         file = open("stats.txt", "w")
+        file.write(str(self._stats[Difficulty.EASY]["best time"]) + "\n")
         file.write(str(self._stats[Difficulty.EASY]["games started"]) + "\n")
-        file.write(str(self._stats[Difficulty.EASY]["games won"]) + "\n")
-        file.write(str(self._stats[Difficulty.EASY]["best time"]))
+        file.write(str(self._stats[Difficulty.EASY]["games won"]))
         file.close()
     
     def reset(self):
         self._stats = Statistics._create_empty()
         self.save()
 
+    def get_games_started(self, difficulty):
+        return self._stats[difficulty]["games started"]
+
     def increment_games_started(self, difficulty):
         self._stats[difficulty]["games started"] += 1
 
+    def get_games_won(self, difficulty):
+        return self._stats[difficulty]["games won"]
+
     def increment_games_won(self, difficulty):
         self._stats[difficulty]["games won"] += 1
+
+    def get_win_rate(self, difficulty):
+        return int(100 * self._stats[difficulty]["games won"] / self._stats[difficulty]["games started"])
+
+    def get_best_time(self, difficulty):
+        return self._stats[difficulty]["best time"]
 
     def set_best_time(self, difficulty, score):
         self._stats[difficulty]["best time"] = score

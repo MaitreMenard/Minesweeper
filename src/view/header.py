@@ -4,10 +4,9 @@ from view.smiley import Smiley
 
 class Header:
     def __init__(self, parent, smiley_callback):
-        self.parent = parent
         self.smiley_callback = smiley_callback
 
-        self.main_frame = tk.Frame(self.parent, height=48, width=250)
+        self.main_frame = tk.Frame(parent, height=48, width=250)
         self.main_frame.grid(row=1, padx=10, pady=1)
         self.main_frame.grid_propagate(0)
         self.main_frame['relief'] = tk.SUNKEN
