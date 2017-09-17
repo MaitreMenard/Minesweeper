@@ -16,14 +16,14 @@ class Minesweeper:
     def __init__(self, width, height, mines):
         self.width = width
         self.height = height
-
+        self.minefield = None
         self.nbrMines = mines
         self.minesLeft = mines
         self.tiles_to_reveal = 0
-
-        self.chronograph = None
+        self.running = False
+        self.win = False
+        self.chronograph = Chronograph(autostart=False)
         self.stats = Statistics()
-        self.minefield = None
 
         self.root = tk.Tk()
         self.root.title('Minesweeper')
@@ -36,9 +36,8 @@ class Minesweeper:
         self.root.mainloop()
 
     def new_game(self):
-        self.vivant = True
+        self.running = True
         self.win = False
-        self.started = False
         self.stats.increment_games_started(Difficulty.EASY)
         self.stats.save()
         self.minefield = Minefield(self.height, self.width, self.nbrMines)
@@ -52,26 +51,20 @@ class Minesweeper:
                                   self.on_tile_button_right_click, self.on_label_left_click)
 
         self.header.set_time(0)
-        if self.chronograph is None:
-            self.chronograph = Chronograph()
-        else:
-            self.chronograph.reset()
+        self.chronograph.reset(autostop=True)
         self.root.after(1, self.update)
 
     def update(self):
-        if self.vivant:
-            if self.started:
-                if not self.win:
-                    self.header.set_time(int(self.chronograph.get()))
-                    self.root.after(1, self.update)
-                else:
-                    time = int(self.chronograph.get())
-                    if time < self.stats.get_best_time(Difficulty.EASY):
-                        self.stats.set_best_time(Difficulty.EASY, time)
-                    self.stats.increment_games_won(Difficulty.EASY)
-                    self.stats.save()
-            else:
+        if self.running:
+            time = int(self.chronograph.get())
+            if not self.win:
+                self.header.set_time(time)
                 self.root.after(1, self.update)
+            else:
+                if time < self.stats.get_best_time(Difficulty.EASY):
+                    self.stats.set_best_time(Difficulty.EASY, time)
+                self.stats.increment_games_won(Difficulty.EASY)
+                self.stats.save()
         
     def on_statistics_window_opened(self):
         StatisticsWindow(self.stats)
@@ -80,18 +73,19 @@ class Minesweeper:
         OptionsWindow()
 
     def on_tile_button_left_click(self, row, column):
-        if not self.started:
-            self.started = True
+        self.chronograph.resume()
 
         self.minefield[row, column].revealed = True
 
         if self.minefield.has_mine_at_position(row, column):
             print("BOOM !!!!")
-            self.vivant = False
+            self.chronograph.pause()
+            self.running = False
         elif self.minefield[row, column].adjacent_mines == 0:
             self.for_each_surrounding_tiles(row, column, self.reveal_tile)
         self.tiles_to_reveal -= 1
         if self.tiles_to_reveal == self.nbrMines:
+            self.chronograph.pause()
             self.win = True
 
     def for_each_surrounding_tiles(self, row, column, function):
