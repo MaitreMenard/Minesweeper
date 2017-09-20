@@ -43,6 +43,7 @@ class Minesweeper:
         self.minefield = Minefield(self.height, self.width, self.nbrMines)
         self.minesLeft = self.nbrMines
         self.header.set_mines_left(self.minesLeft)
+        self.header.set_smiley_face()
         self.tiles_to_reveal = self.width * self.height
 
         if self.tile_grid is not None:
@@ -61,6 +62,7 @@ class Minesweeper:
                 self.header.set_time(time)
                 self.root.after(1, self.update)
             else:
+                self.header.set_sunglasses_face()
                 if time < self.stats.get_best_time(Difficulty.EASY):
                     self.stats.set_best_time(Difficulty.EASY, time)
                 self.stats.increment_games_won(Difficulty.EASY)
@@ -81,6 +83,7 @@ class Minesweeper:
             print("BOOM !!!!")
             self.chronograph.pause()
             self.running = False
+            self.header.set_dead_face()
         elif self.minefield[row, column].adjacent_mines == 0:
             self.for_each_surrounding_tiles(row, column, self.reveal_tile)
         self.tiles_to_reveal -= 1

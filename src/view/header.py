@@ -30,3 +30,12 @@ class Header:
 
     def set_mines_left(self, mines_left):
         self.mines_left_label['text'] = "Mines : {}".format(str(mines_left))
+
+    def set_smiley_face(self):
+        self.smiley.set_smiley_face()
+
+    def set_sunglasses_face(self):
+        self.smiley.set_sunglasses_face()
+
+    def set_dead_face(self):
+        self.smiley.set_dead_face()
