@@ -1,9 +1,9 @@
 import tkinter as tk
 
 from chronograph import Chronograph
-from difficulty import Difficulty
+from domain.difficulty import Difficulty
+from infra.txt_statistics_dao import TxtStatisticsDao
 from minefield import Minefield
-from statistics import Statistics
 from view.header import Header
 from view.menu import Menu
 from view.options_window import OptionsWindow
@@ -16,14 +16,18 @@ class Minesweeper:
     def __init__(self, width, height, mines):
         self.width = width
         self.height = height
-        self.minefield = None
         self.nbrMines = mines
+        self.current_difficulty = Difficulty.EASY
+
         self.minesLeft = mines
         self.tiles_to_reveal = 0
         self.running = False
         self.win = False
+
+        self.minefield = None
         self.chronograph = Chronograph(autostart=False)
-        self.stats = Statistics()
+        self.stats_dao = TxtStatisticsDao()
+        self.stats = self.stats_dao.load()
 
         self.root = tk.Tk()
         self.root.title('Minesweeper')
@@ -38,8 +42,8 @@ class Minesweeper:
     def new_game(self):
         self.running = True
         self.win = False
-        self.stats.increment_games_started(Difficulty.EASY)
-        self.stats.save()
+        self.stats.increment_games_started(self.current_difficulty)
+        self.stats_dao.save(self.stats)
         self.minefield = Minefield(self.height, self.width, self.nbrMines)
         self.minesLeft = self.nbrMines
         self.header.set_mines_left(self.minesLeft)
@@ -63,15 +67,16 @@ class Minesweeper:
                 self.root.after(1, self.update)
             else:
                 self.header.set_sunglasses_face()
-                if time < self.stats.get_best_time(Difficulty.EASY):
-                    self.stats.set_best_time(Difficulty.EASY, time)
-                self.stats.increment_games_won(Difficulty.EASY)
-                self.stats.save()
+                if time < self.stats.get_best_time(self.current_difficulty):
+                    self.stats.set_best_time(self.current_difficulty, time)
+                self.stats.increment_games_won(self.current_difficulty)
+                self.stats_dao.save(self.stats)
         
     def on_statistics_window_opened(self):
         StatisticsWindow(self.stats)
         
-    def on_options_window_opened(self):
+    @staticmethod
+    def on_options_window_opened():
         OptionsWindow()
 
     def on_tile_button_left_click(self, row, column):

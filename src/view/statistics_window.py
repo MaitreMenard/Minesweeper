@@ -1,6 +1,7 @@
-import tkinter as tk
 import math
-from difficulty import Difficulty
+import tkinter as tk
+
+from domain.difficulty import Difficulty
 from view.window import Window
 
 

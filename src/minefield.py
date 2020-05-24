@@ -8,18 +8,18 @@ class Minefield:
         self.height = height
         self.width = width
         self.mines = mines
-        self.grid = None
+        self.grid = self._create_grid()
 
-        self._init_grid()
         self._add_mines_to_grid()
 
-    def _init_grid(self):
-        self.grid = []
+    def _create_grid(self):
+        grid = []
         for i in range(self.height):
             row = []
             for j in range(self.width):
                 row.append(Tile())
-            self.grid.append(row)
+            grid.append(row)
+        return grid
 
     def _add_mines_to_grid(self):
         mines = self.mines
