@@ -1,10 +1,9 @@
-import tkinter as tk
-
 from chronograph import Chronograph
 from domain.difficulty import Difficulty
 from infra.txt_statistics_dao import TxtStatisticsDao
 from minefield import Minefield
 from view.header import Header
+from view.main_window import MainWindow
 from view.menu import Menu
 from view.options_window import OptionsWindow
 from view.statistics_window import StatisticsWindow
@@ -13,7 +12,6 @@ from view.tile_grid import TileGrid
 
 
 class Minesweeper:
-    ICON_FILENAME = "resources/icon.png"
 
     def __init__(self, width, height, mines):
         self.width = width
@@ -31,10 +29,7 @@ class Minesweeper:
         self.stats_dao = TxtStatisticsDao()
         self.stats = self.stats_dao.load()
 
-        self.root = tk.Tk()
-        self.root.title('Minesweeper')
-        self.root.iconphoto(False, tk.PhotoImage(file=self.ICON_FILENAME))
-
+        self.root = MainWindow()
         self.menu = Menu(self.root, self.new_game, self.on_statistics_window_opened, self.on_options_window_opened,
                          self.exit)
         self.header = Header(self.root, self.new_game)
@@ -75,13 +70,12 @@ class Minesweeper:
                     self.stats.set_best_time(self.current_difficulty, time)
                 self.stats.increment_games_won(self.current_difficulty)
                 self.stats_dao.save(self.stats)
-        
+
     def on_statistics_window_opened(self):
-        StatisticsWindow(self.stats)
-        
-    @staticmethod
-    def on_options_window_opened():
-        OptionsWindow()
+        StatisticsWindow(self.root, self.stats)
+
+    def on_options_window_opened(self):
+        OptionsWindow(self.root)
 
     def on_tile_button_left_click(self, row, column):
         self.chronograph.resume()

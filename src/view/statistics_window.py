@@ -2,12 +2,12 @@ import math
 import tkinter as tk
 
 from domain.difficulty import Difficulty
-from view.window import Window
+from view.menu_window import MenuWindow
 
 
-class StatisticsWindow(Window):
-    def __init__(self, statistics):
-        super().__init__("statistics")
+class StatisticsWindow(MenuWindow):
+    def __init__(self, root, statistics):
+        super().__init__(root, "statistics")
         table_frame = tk.Frame(self.window, height=30, width=30)
         table_frame.grid(row=1, pady=1)
         table_frame['relief'] = tk.SUNKEN
