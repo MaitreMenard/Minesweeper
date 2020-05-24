@@ -13,6 +13,8 @@ from view.tile_grid import TileGrid
 
 
 class Minesweeper:
+    ICON_FILENAME = "resources/icon.png"
+
     def __init__(self, width, height, mines):
         self.width = width
         self.height = height
@@ -31,6 +33,8 @@ class Minesweeper:
 
         self.root = tk.Tk()
         self.root.title('Minesweeper')
+        self.root.iconphoto(False, tk.PhotoImage(file=self.ICON_FILENAME))
+
         self.menu = Menu(self.root, self.new_game, self.on_statistics_window_opened, self.on_options_window_opened,
                          self.exit)
         self.header = Header(self.root, self.new_game)
