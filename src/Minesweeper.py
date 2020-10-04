@@ -2,6 +2,7 @@ from chronograph import Chronograph
 from domain.difficulty import Difficulty
 from infra.txt_statistics_dao import TxtStatisticsDao
 from minefield import Minefield
+from view.button_factory import ButtonFactory
 from view.header import Header
 from view.main_window import MainWindow
 from view.menu import Menu
@@ -12,7 +13,6 @@ from view.tile_grid import TileGrid
 
 
 class Minesweeper:
-
     def __init__(self, width, height, mines):
         self.width = width
         self.height = height
@@ -35,6 +35,8 @@ class Minesweeper:
         self.header = Header(self.root, self.new_game)
         self.tile_grid = None
 
+        self.button_factory = ButtonFactory(self.on_tile_button_left_click, self.on_tile_button_right_click)
+
         self.new_game()
         self.root.mainloop()
 
@@ -51,8 +53,7 @@ class Minesweeper:
 
         if self.tile_grid is not None:
             self.tile_grid.destroy()
-        self.tile_grid = TileGrid(self.root, self.minefield, self.on_tile_button_left_click,
-                                  self.on_tile_button_right_click, self.on_label_left_click)
+        self.tile_grid = TileGrid(self.root, self.minefield, self.button_factory, self.on_label_left_click)
 
         self.header.set_time(0)
         self.chronograph.reset(autostop=True)

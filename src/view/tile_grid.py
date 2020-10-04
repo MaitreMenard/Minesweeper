@@ -1,19 +1,22 @@
 import tkinter as tk
 
-from view.tile_label import TileLabel
 from view.tile_button import TileButton
+from view.tile_label import TileLabel
 
 
 class TileGrid:
-    def __init__(self, parent, minefield, left_click_callback, right_click_callback, label_callback):
+    BORDERWIDTH = 5
+
+    def __init__(self, parent, minefield, button_factory, label_callback):
         self.height = minefield.height
         self.width = minefield.width
         self.button_list = []
-        self.frame = tk.Frame(parent, height=347, width=277)
+        self.frame = tk.Frame(parent, height=self.size(self.height), width=self.size(self.width))
         self.frame.grid(padx=6, pady=4)
         self.frame['relief'] = tk.SUNKEN
-        self.frame["borderwidth"] = 5
+        self.frame["borderwidth"] = TileGrid.BORDERWIDTH
         self.frame.grid_propagate(0)
+        self.button_factory = button_factory
 
         for i in range(self.height):
             row = []
@@ -22,9 +25,13 @@ class TileGrid:
                     TileLabel(self.frame, i, j, -1, label_callback)
                 else:
                     TileLabel(self.frame, i, j, minefield[i, j].adjacent_mines, label_callback)
-                row.append(TileButton(self.frame, i, j, left_click_callback, right_click_callback))
+                row.append(self.button_factory.create(self.frame, i, j))
 
             self.button_list.append(row)
+
+    @staticmethod
+    def size(num_tiles):
+        return num_tiles * TileButton.TOTAL_SIZE + 2 * TileGrid.BORDERWIDTH
 
     def destroy(self):
         if len(self.button_list) != 0:
