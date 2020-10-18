@@ -1,18 +1,20 @@
-from chronograph import Chronograph
-from domain.difficulty import Difficulty
-from infra.txt_statistics_dao import TxtStatisticsDao
-from minefield import Minefield
-from view.button_factory import ButtonFactory
-from view.header import Header
-from view.main_window import MainWindow
-from view.menu import Menu
-from view.options_window import OptionsWindow
-from view.statistics_window import StatisticsWindow
-from view.tile_button import ButtonState
-from view.tile_grid import TileGrid
+from src.chronograph import Chronograph
+from src.domain.difficulty import Difficulty
+from src.infra.txt_statistics_dao import TxtStatisticsDao
+from src.minefield import Minefield
+from src.view.button_factory import ButtonFactory
+from src.view.header import Header
+from src.view.main_window import MainWindow
+from src.view.menu import Menu
+from src.view.options_window import OptionsWindow
+from src.view.statistics_window import StatisticsWindow
+from src.view.tile_button import ButtonState
+from src.view.tile_grid import TileGrid
 
 
 class Minesweeper:
+    SAVE_FILENAME = "src/infra/stats.txt"
+
     def __init__(self, width, height, mines):
         self.width = width
         self.height = height
@@ -26,21 +28,25 @@ class Minesweeper:
 
         self.minefield = None
         self.chronograph = Chronograph(autostart=False)
-        self.stats_dao = TxtStatisticsDao()
+        self.stats_dao = TxtStatisticsDao(self.SAVE_FILENAME)
         self.stats = self.stats_dao.load()
 
         self.root = MainWindow()
         self.menu = Menu(self.root, self.new_game, self.on_statistics_window_opened, self.on_options_window_opened,
                          self.exit)
-        self.header = Header(self.root, self.new_game)
+        self.header = Header(self.root, self.restart)
         self.tile_grid = None
 
         self.button_factory = ButtonFactory(self.on_tile_button_left_click, self.on_tile_button_right_click)
 
-        self.new_game()
+        self.new_game(self.current_difficulty)
         self.root.mainloop()
 
-    def new_game(self):
+    def restart(self):
+        self.new_game(self.current_difficulty)
+
+    def new_game(self, difficulty: Difficulty):
+        print(difficulty)
         self.running = True
         self.win = False
         self.stats.increment_games_started(self.current_difficulty)

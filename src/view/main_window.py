@@ -2,7 +2,7 @@ from tkinter import Tk, PhotoImage
 
 
 class MainWindow(Tk):
-    ICON_FILENAME = "resources/icon.png"
+    ICON_FILENAME = "src/resources/icon.png"
 
     def __init__(self):
         super().__init__()

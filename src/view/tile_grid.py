@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from view.tile_button import TileButton
-from view.tile_label import TileLabel
+from src.view.tile_button import TileButton
+from src.view.tile_label import TileLabel
 
 
 class TileGrid:

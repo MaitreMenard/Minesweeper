@@ -1,7 +1,7 @@
 import ctypes
 import sys
 
-from Minesweeper import Minesweeper
+from src.Minesweeper import Minesweeper
 
 if sys.platform.startswith('win'):
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("minesweeper")

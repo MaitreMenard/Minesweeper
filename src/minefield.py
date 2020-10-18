@@ -1,6 +1,6 @@
 import random
 
-from tile import Tile
+from src.tile import Tile
 
 
 class Minefield:

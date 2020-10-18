@@ -1,8 +1,8 @@
 import math
 import tkinter as tk
 
-from domain.difficulty import Difficulty
-from view.menu_window import MenuWindow
+from src.domain.difficulty import Difficulty
+from src.view.menu_window import MenuWindow
 
 
 class StatisticsWindow(MenuWindow):

@@ -1,5 +1,5 @@
 import tkinter as tk
-from view.smiley import Smiley
+from src.view.smiley import Smiley
 
 
 class Header:

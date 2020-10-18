@@ -10,9 +10,9 @@ class Smiley:
     def __init__(self, parent, callback):
         self.parent = parent
         self.callback = callback
-        self.smiley_face = tk.PhotoImage(file="resources/smiley.gif").subsample(2, 2)
-        self.sunglasses_face = tk.PhotoImage(file="resources/sunglasses.gif").subsample(2, 2)
-        self.dead_face = tk.PhotoImage(file="resources/dead.gif").subsample(2, 2)
+        self.smiley_face = tk.PhotoImage(file="src/resources/smiley.gif").subsample(2, 2)
+        self.sunglasses_face = tk.PhotoImage(file="src/resources/sunglasses.gif").subsample(2, 2)
+        self.dead_face = tk.PhotoImage(file="src/resources/dead.gif").subsample(2, 2)
 
         self.frame = tk.Frame(self.parent)
         self.frame.grid(row=0, column=3)

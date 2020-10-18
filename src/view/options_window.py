@@ -1,5 +1,5 @@
 import tkinter as tk
-from view.menu_window import MenuWindow
+from src.view.menu_window import MenuWindow
 
 
 class OptionsWindow(MenuWindow):

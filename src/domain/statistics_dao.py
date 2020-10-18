@@ -1,6 +1,6 @@
 import abc
 
-from domain.statistics import Statistics
+from src.domain.statistics import Statistics
 
 
 class StatisticsDao:
