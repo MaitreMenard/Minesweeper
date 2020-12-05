@@ -1,5 +1,5 @@
 from src.chronograph import Chronograph
-from src.domain.difficulty import Difficulty
+from src.domain.difficulty import Difficulty, select_configuration
 from src.infra.txt_statistics_dao import TxtStatisticsDao
 from src.minefield import Minefield
 from src.view.button_factory import ButtonFactory
@@ -15,13 +15,13 @@ from src.view.tile_grid import TileGrid
 class Minesweeper:
     SAVE_FILENAME = "src/infra/stats.txt"
 
-    def __init__(self, width, height, mines):
-        self.width = width
-        self.height = height
-        self.nbrMines = mines
-        self.current_difficulty = Difficulty.EASY
+    def __init__(self, difficulty: Difficulty):
+        self.width = 0
+        self.height = 0
+        self.nbrMines = 0
+        self.current_difficulty = None
 
-        self.minesLeft = mines
+        self.minesLeft = 0
         self.tiles_to_reveal = 0
         self.running = False
         self.win = False
@@ -39,14 +39,20 @@ class Minesweeper:
 
         self.button_factory = ButtonFactory(self.on_tile_button_left_click, self.on_tile_button_right_click)
 
-        self.new_game(self.current_difficulty)
+        self.new_game(difficulty)
         self.root.mainloop()
 
     def restart(self):
         self.new_game(self.current_difficulty)
 
     def new_game(self, difficulty: Difficulty):
-        print(difficulty)
+        self.current_difficulty = difficulty
+
+        configuration = select_configuration(difficulty)
+        self.width = configuration.width
+        self.height = configuration.height
+        self.nbrMines = configuration.mines
+
         self.running = True
         self.win = False
         self.stats.increment_games_started(self.current_difficulty)
