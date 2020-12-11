@@ -79,7 +79,7 @@ class Minesweeper:
                 self.root.after(1, self.update)
             else:
                 self.header.set_sunglasses_face()
-                if time < self.stats.get_best_time(self.current_difficulty):
+                if self.stats.is_best_time(self.current_difficulty, time):
                     self.stats.set_best_time(self.current_difficulty, time)
                 self.stats.increment_games_won(self.current_difficulty)
                 self.stats_dao.save(self.stats)
@@ -88,7 +88,7 @@ class Minesweeper:
         StatisticsWindow(self.root, self.stats)
 
     def on_options_window_opened(self):
-        OptionsWindow(self.root)
+        OptionsWindow(self.root, self.reset_stats)
 
     def on_tile_button_left_click(self, row, column):
         self.chronograph.resume()
@@ -161,3 +161,7 @@ class Minesweeper:
 
     def is_flagged(self, i, j):
         return self.minefield[i, j].flagged
+
+    def reset_stats(self):
+        self.stats.reset()
+        self.stats_dao.save(self.stats)
