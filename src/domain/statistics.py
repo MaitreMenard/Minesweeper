@@ -63,3 +63,12 @@ class Statistics:
 
     def is_best_time(self, difficulty: Difficulty, time):
         return time < self._stats[difficulty].best_time
+
+    def __eq__(self, other):
+        if not isinstance(other, Statistics):
+            return False
+
+        return self._stats == other._stats
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

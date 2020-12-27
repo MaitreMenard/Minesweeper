@@ -13,7 +13,7 @@ from src.view.tile_grid import TileGrid
 
 
 class Minesweeper:
-    SAVE_FILENAME = "src/infra/stats.txt"
+    SAVE_FILENAME = "src/data/stats.txt"
 
     def __init__(self, difficulty: Difficulty):
         self.width = 0
