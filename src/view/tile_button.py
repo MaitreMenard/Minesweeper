@@ -33,7 +33,6 @@ class TileButton(tk.Button):
         self.bind("<Button-3>", self.on_right_click)
 
     def on_left_click(self):
-        self.destroy()
         self.left_click_callback(self.i, self.j)
 
     def on_right_click(self, _):

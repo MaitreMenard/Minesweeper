@@ -42,4 +42,4 @@ class TileGrid:
         self.frame.destroy()
 
     def reveal_tile(self, i, j):
-        self.button_list[i][j].on_left_click()
+        self.button_list[i][j].destroy()

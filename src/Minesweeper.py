@@ -24,7 +24,6 @@ class Minesweeper:
         self.minesLeft = 0
         self.tiles_to_reveal = 0
         self.running = False
-        self.win = False
 
         self.minefield = None
         self.chronograph = Chronograph(autostart=False)
@@ -54,7 +53,6 @@ class Minesweeper:
         self.nbrMines = configuration.mines
 
         self.running = True
-        self.win = False
         self.stats.increment_games_started(self.current_difficulty)
         self.stats_dao.save(self.stats)
         self.minefield = Minefield(self.height, self.width, self.nbrMines)
@@ -74,10 +72,12 @@ class Minesweeper:
     def update(self):
         if self.running:
             time = int(self.chronograph.get())
-            if not self.win:
+
+            if self.tiles_to_reveal != self.nbrMines:
                 self.header.set_time(time)
                 self.root.after(1, self.update)
             else:
+                self.chronograph.pause()
                 self.header.set_sunglasses_face()
                 if self.stats.is_best_time(self.current_difficulty, time):
                     self.stats.set_best_time(self.current_difficulty, time)
@@ -94,20 +94,17 @@ class Minesweeper:
         self.chronograph.resume()
 
         self.minefield[row, column].revealed = True
+        self.tiles_to_reveal -= 1
+        self.tile_grid.reveal_tile(row, column)
 
         if self.minefield.has_mine_at_position(row, column):
-            print("BOOM !!!!")
             self.chronograph.pause()
             self.running = False
             self.header.set_dead_face()
         elif self.minefield[row, column].adjacent_mines == 0:
-            self.for_each_surrounding_tiles(row, column, self.reveal_tile)
-        self.tiles_to_reveal -= 1
-        if self.tiles_to_reveal == self.nbrMines:
-            self.chronograph.pause()
-            self.win = True
+            self.reveal_surrounding_tiles(row, column)
 
-    def for_each_surrounding_tiles(self, row, column, function):
+    def reveal_surrounding_tiles(self, row, column):
         min_row = max(0, row - 1)
         max_row = min(self.height - 1, row + 1)
         min_column = max(0, column - 1)
@@ -116,11 +113,16 @@ class Minesweeper:
         for i in range(min_row, max_row + 1):
             for j in range(min_column, max_column + 1):
                 if i != row or j != column:
-                    function(i, j)
+                    if not self.is_revealed(i, j):
+                        self.reveal_tile(i, j)
 
     def reveal_tile(self, row, column):
-        if not self.is_revealed(row, column):
-            self.tile_grid.reveal_tile(row, column)
+        self.minefield[row, column].revealed = True
+        self.tiles_to_reveal -= 1
+        self.tile_grid.reveal_tile(row, column)
+
+        if self.minefield[row, column].adjacent_mines == 0:
+            self.reveal_surrounding_tiles(row, column)
 
     def on_tile_button_right_click(self, row, column, button_state):
         if button_state == ButtonState.FLAGGED:
@@ -151,7 +153,7 @@ class Minesweeper:
                 for j in range(min_column, max_column + 1):
                     if i != row or j != column:
                         if not self.is_revealed(i, j) and not self.is_flagged(i, j):
-                            self.tile_grid.reveal_tile(i, j)
+                            self.reveal_tile(i, j)
 
     def exit(self):
         self.root.quit()
