@@ -1,5 +1,6 @@
 from src.chronograph import Chronograph
 from src.domain.difficulty import Difficulty, select_configuration
+from src.domain.game_state import GameState
 from src.infra.txt_statistics_dao import TxtStatisticsDao
 from src.minefield import Minefield
 from src.view.button_factory import ButtonFactory
@@ -18,12 +19,10 @@ class Minesweeper:
     def __init__(self, difficulty: Difficulty):
         self.width = 0
         self.height = 0
-        self.nbrMines = 0
         self.current_difficulty = None
 
-        self.minesLeft = 0
-        self.tiles_to_reveal = 0
         self.running = False
+        self.game_state = None
 
         self.minefield = None
         self.chronograph = Chronograph(autostart=False)
@@ -50,16 +49,13 @@ class Minesweeper:
         configuration = select_configuration(difficulty)
         self.width = configuration.width
         self.height = configuration.height
-        self.nbrMines = configuration.mines
 
         self.running = True
-        self.stats.increment_games_started(self.current_difficulty)
-        self.stats_dao.save(self.stats)
-        self.minefield = Minefield(self.height, self.width, self.nbrMines)
-        self.minesLeft = self.nbrMines
-        self.header.set_mines_left(self.minesLeft)
+        tiles_to_reveal = self.width * self.height
+        self.game_state = GameState(tiles_to_reveal, configuration.mines)
+        self.minefield = Minefield(self.height, self.width, configuration.mines)
+        self.header.set_mines_left(self.game_state.get_mines_left())
         self.header.set_smiley_face()
-        self.tiles_to_reveal = self.width * self.height
 
         if self.tile_grid is not None:
             self.tile_grid.destroy()
@@ -73,7 +69,7 @@ class Minesweeper:
         if self.running:
             time = int(self.chronograph.get())
 
-            if self.tiles_to_reveal != self.nbrMines:
+            if not self.game_state.is_game_won():
                 self.header.set_time(time)
                 self.root.after(1, self.update)
             else:
@@ -91,10 +87,11 @@ class Minesweeper:
         OptionsWindow(self.root, self.reset_stats)
 
     def on_tile_button_left_click(self, row, column):
-        self.chronograph.resume()
+        if not self.game_state.is_game_started():
+            self.start_game()
 
         self.minefield[row, column].revealed = True
-        self.tiles_to_reveal -= 1
+        self.game_state.reveal_tile()
         self.tile_grid.reveal_tile(row, column)
 
         if self.minefield.has_mine_at_position(row, column):
@@ -103,6 +100,11 @@ class Minesweeper:
             self.header.set_dead_face()
         elif self.minefield[row, column].adjacent_mines == 0:
             self.reveal_surrounding_tiles(row, column)
+
+    def start_game(self):
+        self.stats.increment_games_started(self.current_difficulty)
+        self.stats_dao.save(self.stats)
+        self.chronograph.resume()
 
     def reveal_surrounding_tiles(self, row, column):
         min_row = max(0, row - 1)
@@ -118,21 +120,23 @@ class Minesweeper:
 
     def reveal_tile(self, row, column):
         self.minefield[row, column].revealed = True
-        self.tiles_to_reveal -= 1
+        self.game_state.reveal_tile()
         self.tile_grid.reveal_tile(row, column)
 
         if self.minefield[row, column].adjacent_mines == 0:
             self.reveal_surrounding_tiles(row, column)
 
     def on_tile_button_right_click(self, row, column, button_state):
+        if not self.game_state.is_game_started():
+            self.start_game()
+
         if button_state == ButtonState.FLAGGED:
             self.minefield[row, column].flagged = True
-            if self.minesLeft > 0:
-                self.minesLeft -= 1
+            self.game_state.flag_tile()
         elif button_state == ButtonState.QUESTION_MARK:
             self.minefield[row, column].flagged = False
-            self.minesLeft += 1
-        self.header.set_mines_left(self.minesLeft)
+            self.game_state.unflag_tile()
+        self.header.set_mines_left(self.game_state.get_mines_left())
 
     def on_label_left_click(self, row, column):
         flags = 0
