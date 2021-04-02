@@ -1,6 +1,7 @@
 from src.chronograph import Chronograph
 from src.domain.difficulty import Difficulty, select_configuration
 from src.domain.game_state import GameState
+from src.infra.random_seed_generator import RandomSeedGenerator
 from src.infra.txt_statistics_dao import TxtStatisticsDao
 from src.minefield import Minefield
 from src.view.button_factory import ButtonFactory
@@ -24,6 +25,7 @@ class Minesweeper:
         self.running = False
         self.game_state = None
 
+        self.seed_generator = RandomSeedGenerator()
         self.minefield = None
         self.chronograph = Chronograph(autostart=False)
         self.stats_dao = TxtStatisticsDao(self.SAVE_FILENAME)
@@ -53,7 +55,7 @@ class Minesweeper:
         self.running = True
         tiles_to_reveal = self.width * self.height
         self.game_state = GameState(tiles_to_reveal, configuration.mines)
-        self.minefield = Minefield(self.height, self.width, configuration.mines)
+        self.minefield = Minefield(self.height, self.width, configuration.mines, self.seed_generator.generate())
         self.header.set_mines_left(self.game_state.get_mines_left())
         self.header.set_smiley_face()
 

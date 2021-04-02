@@ -4,13 +4,13 @@ from src.tile import Tile
 
 
 class Minefield:
-    def __init__(self, height, width, mines):
+    def __init__(self, height, width, mines, seed):
         self.height = height
         self.width = width
         self.mines = mines
         self.grid = self._create_grid()
 
-        self._add_mines_to_grid()
+        self._add_mines_to_grid(seed)
 
     def _create_grid(self):
         grid = []
@@ -21,8 +21,9 @@ class Minefield:
             grid.append(row)
         return grid
 
-    def _add_mines_to_grid(self):
+    def _add_mines_to_grid(self, seed):
         mines = self.mines
+        random.seed(seed)
         while mines > 0:
             mine_x = random.randrange(self.width)
             mine_y = random.randrange(self.height)
@@ -65,5 +66,5 @@ if __name__ == "__main__":
     WIDTH = 9
     HEIGHT = 9
     nbrMines = 10 
-    field = Minefield(HEIGHT, WIDTH, nbrMines)
+    field = Minefield(HEIGHT, WIDTH, nbrMines, 42)
     print(field)
